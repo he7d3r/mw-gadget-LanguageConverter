@@ -1,0 +1,26 @@
+/* Keep the line below. It is used to check the global usage of the script at [[Special:GlobalUsage/User:Helder.wiki/Scripts/LanguageConverter.js]]
+ * [[File:User:Helder.wiki/Scripts/LanguageConverter.js]]
+ */
+/* Modernização automática de textos */
+#p-variants-js li#ca-conv-pt-br a,
+div#mw-head div#p-variants-js.vectorMenu h4.flag-pt-br {
+	background: url("http://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/30px-Flag_of_Brazil.svg.png") no-repeat scroll left center transparent;
+	padding-left:40px;
+}
+#p-variants-js li#ca-conv-pt-pt a,
+div#mw-head div#p-variants-js.vectorMenu h4.flag-pt-pt {
+	background: url("http://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Flag_of_Portugal.svg/30px-Flag_of_Portugal.svg.png") no-repeat scroll left center transparent;
+	padding-left:40px;
+}
+#p-variants-js li a,
+div#mw-head div#p-variants-js.vectorMenu h4 {
+	background-position: 5px !important;
+}
+ 
+div#mw-head div#p-variants-js.vectorMenu h4 {
+	background-position: 5px 13px !important;
+}
+.show-changes .v-pt-br,
+.show-changes .v-pt-pt {
+	background-color: #AAFFAA;
+}
