@@ -49,7 +49,7 @@ if ( typeof window.LanguageConverter === 'undefined' ) {
 /**
  * Set the current version
  */
-window.LanguageConverter.version = '2.26';
+window.LanguageConverter.version = '2.27';
 mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 
 /**
@@ -636,7 +636,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 	*/
 	lc.startConversion = function ( l ){
 		mw.log('Started conversion to "' + l + '"');
-		var	ch, re, dicts, changes, api;
+		var	ch, re, dicts, changes, change, api;
 
 		//if (undefined === l) l = lc.get_preferred_variant()
 		x = document.getElementById('p-variants-js');
@@ -660,10 +660,14 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		if( changes ) {
 			if ( changes.constructor === Array ){
 				for ( ch = 0; ch < changes.length; ch++ ) {
-					if ( changes[ ch ].length !== 2 || changes[ ch ][1] === null ) {
+					change = changes[ ch ];
+					if ( change.length !== 2 || change[1] === null ) {
 						continue;
 					}
-					lc.regTypoChanges.push( changes[ ch ] );
+					if ( typeof change[0] == 'string' ) {
+						change[0] = new RegExp( $.escapeRE( change[0] ), 'g' );
+					}
+					lc.regTypoChanges.push( change );
 				}
 			} else if ( changes.constructor === Object ) {
 				for ( ch in changes ) {
