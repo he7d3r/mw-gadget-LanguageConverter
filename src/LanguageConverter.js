@@ -34,7 +34,7 @@
  * Added some debug messages using mw.log
  * Replaced some functions by jQuery equivalents (e.g. $.extend to override settings, $.getJSON to access the API)
  * Avoided conversion of the content of diffs
- * Escaped HTML
+ * Escaped HTML and typo changes
  * Removed unused parameters
  */
 mw.log('Loaded LanguageConverter.js source file');
@@ -49,7 +49,7 @@ if ( typeof window.LanguageConverter === 'undefined' ) {
 /**
  * Set the current version
  */
-window.LanguageConverter.version = '2.27';
+window.LanguageConverter.version = '2.28';
 mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 
 /**
@@ -675,7 +675,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 						continue;
 					}
 					try {
-						re = new RegExp( ch, 'g' );
+						re = new RegExp( $.escapeRE( ch ), 'g' );
 						lc.regTypoChanges.push( [ re, changes[ ch ] ] );
 					} catch(err) {
 						alert(
