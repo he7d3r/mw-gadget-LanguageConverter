@@ -49,7 +49,7 @@ if ( typeof window.LanguageConverter === 'undefined' ) {
 /**
  * Set the current version
  */
-window.LanguageConverter.version = '2.28';
+window.LanguageConverter.version = '2.29';
 mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 
 /**
@@ -835,7 +835,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 			mw.log('Language converter is not allowed on this page. Returning');
 			return;
 		}
-		lc.secure = mw.config.get( 'wgServer' ).indexOf( 'https' ) === 0;
+		lc.secure = location.protocol === 'https:';
 
 		/**
 		 * Variant currently selected
