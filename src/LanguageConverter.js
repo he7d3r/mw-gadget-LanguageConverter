@@ -49,7 +49,7 @@ if ( typeof window.LanguageConverter === 'undefined' ) {
 /**
  * Set the current version
  */
-window.LanguageConverter.version = '2.30';
+window.LanguageConverter.version = '2.31';
 mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 
 /**
@@ -705,9 +705,9 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		}
 		$.ajax({
 			url: api,
-			dataType: 'json',
+			dataType: type,
 			data: {
-				'format': type,
+				'format': 'json',
 				'action': 'query',
 				'titles': dicts,
 				'prop': 'revisions',
