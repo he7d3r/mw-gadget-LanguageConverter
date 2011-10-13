@@ -32,7 +32,7 @@
  * Regexes for typographic changes are created only when conversion starts (instead of recreated when converting each HTML element)
  * Updated to use MW 1.17 default JavaScript modules
  * Added some debug messages using mw.log
- * Replaced some functions by jQuery equivalents (e.g. $.extend to override settings, $.getJSON to access the API)
+ * Replaced some functions by jQuery equivalents (e.g. $.extend to override settings, $.ajax to access the API)
  * Avoided conversion of the content of diffs
  * Escaped HTML and typo changes
  * Removed unused parameters
@@ -49,7 +49,7 @@ if ( typeof window.LanguageConverter === 'undefined' ) {
 /**
  * Set the current version
  */
-window.LanguageConverter.version = '2.29';
+window.LanguageConverter.version = '2.30';
 mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 
 /**
@@ -636,7 +636,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 	*/
 	lc.startConversion = function ( l ){
 		mw.log('Started conversion to "' + l + '"');
-		var	ch, re, dicts, changes, change, api;
+		var	ch, re, dicts, changes, change, api, type;
 
 		//if (undefined === l) l = lc.get_preferred_variant()
 		x = document.getElementById('p-variants-js');
@@ -686,7 +686,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 				}
 			}
 		}
-        dicts = lc.settings.global_dic_page[ lc.lang ];
+		dicts = lc.settings.global_dic_page[ lc.lang ];
 		if ( typeof dicts === 'object' ) {
 			api = dicts.api;
 			if ( typeof api === 'object' && api.length == 2 ) {
@@ -697,19 +697,25 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 				}
 			}
 			dicts = dicts.pages || dicts.page;
+			// Same origin check
+			type = api === mw.config.get( 'wgServer' ) + mw.util.wikiScript( 'api' ) ? 'json' : 'jsonp';
 		} else {
 			api = mw.util.wikiScript( 'api' );
+			type = 'json';
 		}
-		$.getJSON(
-			api, {
-				'format': 'json',
+		$.ajax({
+			url: api,
+			dataType: 'json',
+			data: {
+				'format': type,
 				'action': 'query',
 				'titles': dicts,
 				'prop': 'revisions',
 				'rvprop': 'content',
 				'indexpageids': '1'
-			}, LanguageConverter.conv_callback
-		);
+			},
+			success: LanguageConverter.conv_callback
+		});
 		mw.log('Finished conversion');
 	};
 	/*
