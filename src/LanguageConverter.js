@@ -57,7 +57,7 @@ mw.log('Loaded LanguageConverter.js source file');
 /**
  * Set the current version
  */
-lc.version = '2.31';
+lc.version = '2.33';
 mw.log('LanguageConverter version is ' + lc.version );
 
 	// The cookie used by Language Converter
@@ -495,7 +495,7 @@ mw.log('LanguageConverter version is ' + lc.version );
 	* @param {Object} node The node whose text descendant nodes will be modernized
 	*/
 	lc.conv_node_from_dic = function ( node ) {
-		var	data, parent, sp, i,
+		var	data, i,
 			showChanges = true; // || lc.show_changes;
 		if ( node.nodeType === 3 ) {
 			data = lc.conv_text_from_dic( node.data, showChanges );
@@ -520,7 +520,7 @@ mw.log('LanguageConverter version is ' + lc.version );
 		mw.log('Started "lc.conv_callback" function');
 		lc.conv_typo_document();
 
-		var	query, pages, pageids, page,
+		var	query, pages, pageids,
 			pagenames = lc.settings.global_dic_page[ lc.lang ],
 			sortable = [],
 			str, lines, line, data, li, h4, a, v,
