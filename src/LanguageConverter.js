@@ -1,9 +1,10 @@
+/*jslint browser: true, white: true, todo: true, continue: true, forin: true, vars: true, devel: true, regexp: true */
+/*global jQuery, mediaWiki, LanguageConverter, self, removeSpinner, injectSpinner */
 /**
  * Based on [[oldwikisource:MediaWiki:Modernisation.js]]
- * Global Usage: [[Special:GlobalUsage/User:Helder.wiki/Scripts/LanguageConverter.js]]
- * (links to [[File:User:Helder.wiki/Scripts/LanguageConverter.js]])
  * @author [[:fr:User:ThomasV]]
- * @author [[b:pt:User:Helder.wiki]]
+ * @author: [[User:Helder.wiki]]
+ * @tracking: [[Special:GlobalUsage/User:Helder.wiki/Scripts/LanguageConverter.js]] ([[File:User:Helder.wiki/Scripts/LanguageConverter.js]])
  *
  * RELEASE NOTES:
  * Translation and addition of basic support to Portuguese;
@@ -37,33 +38,36 @@
  * Escaped HTML and typo changes
  * Removed unused parameters
  */
-mw.log('Loaded LanguageConverter.js source file');
 
 /**
  * Setup the Language Converter global:
  */
-if ( typeof window.LanguageConverter === 'undefined' ) {
-    window.LanguageConverter = { };
+if ( window.LanguageConverter === undefined ) {
+    window.LanguageConverter = {};
 }
+
+/**
+ * The global Language Converter object
+ */
+( function ( mw, $, lc ) {
+'use strict';
+
+mw.log('Loaded LanguageConverter.js source file');
 
 /**
  * Set the current version
  */
-window.LanguageConverter.version = '2.31';
-mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
+lc.version = '2.31';
+mw.log('LanguageConverter version is ' + lc.version );
 
-/**
- * The global Language Converter object:
- */
-( function( lc ) {
 	// The cookie used by Language Converter
 	lc.cookie = mw.config.get( 'wgDBname' ) + '-lang-variant';
 
 	/**
 	* Dictionary to be used during the conversion
 	*/
-	if ( typeof lc.dictionary === 'undefined' ) {
-		lc.dictionary = { };
+	if ( lc.dictionary === undefined ) {
+		lc.dictionary = {};
 	}
 
 	/**
@@ -87,12 +91,15 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 			msg = msgs[name];
 		if( typeof msg === 'string' ) {
 			return msg;
-		} else if ( typeof msg === 'object' ) {
+		}
+		if ( typeof msg === 'object' ) {
 			if( msg[ lc.lang ] ) {
 				return msg[ lc.lang ];
-			} else if ( msg[ mw.config.get( 'wgContentLanguage' ) ] ) {
+			}
+			if ( msg[ mw.config.get( 'wgContentLanguage' ) ] ) {
 				return msg[ mw.config.get( 'wgContentLanguage' ) ];
-			} else if ( msg.en ){
+			}
+			if ( msg.en ){
 				return msg.en;
 			}
 		}
@@ -142,7 +149,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 	* Add or remove the class 'show-changes' to/from content div
 	*/
 	lc.toggle_visibility = function () {
-		//TODO: Consider the use of two variables: show_changes and enable_show_changes.
+		// TODO: Consider the use of two variables: show_changes and enable_show_changes.
 		var show = !lc.settings.show_changes;
 		lc.settings.show_changes = show;
 		$('#content').toggleClass('show-changes', show);
@@ -267,7 +274,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		var	ch,
 			rule,
 			max = lc.regTypoChanges.length;
-		for ( ch = 0 ; ch < max; ch++ ) {
+		for ( ch = 0 ; ch < max; ch += 1 ) {
 			rule = lc.regTypoChanges[ch];
 			try {
 				text = text.replace( rule[0], rule[1] );
@@ -290,7 +297,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		if ( node.nodeType === 3 ) {
 			node.data = lc.conv_typo_text( node.data );
 		} else {
-			for ( i = 0; i < node.childNodes.length; i++ ) {
+			for ( i = 0; i < node.childNodes.length; i += 1 ) {
 				if ( node.id !== 'editform' && !node.className.match( lc.regClass ) ) {
 					lc.conv_typo_node( node.childNodes[i] );
 				}
@@ -325,18 +332,19 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 				(separator.sticky     ? 'y' : ''),
 			separator2, match, lastIndex, lastLength;
 		// make 'global' and avoid 'lastIndex' issues
-		separator = RegExp(separator.source, flags + 'g');
+		separator = new RegExp(separator.source, flags + 'g');
 
 		var compliantExecNpcg = /()??/.exec('')[1] === undefined;
 
-		str = str + ''; // type conversion
+		str = String( str ); // type conversion
 		if (!compliantExecNpcg) {
 			// doesn't need /g or /y, but they don't hurt
-			separator2 = RegExp('^' + separator.source + '$(?!\\s)', flags);
+			separator2 = new RegExp('^' + separator.source + '$(?!\\s)', flags);
 		}
 		match = separator.exec(str);
 		var setUndefinedGroups = function () {
-			for (var i = 1; i < arguments.length - 2; i++) {
+			var i;
+			for (i = 1; i < arguments.length - 2; i += 1) {
 				if (arguments[i] === undefined) {
 					match[i] = undefined;
 				}
@@ -362,7 +370,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 			}
 
 			if (separator.lastIndex === match.index) {
-				separator.lastIndex++; // avoid an infinite loop
+				separator.lastIndex += 1; // avoid an infinite loop
 			}
 			match = separator.exec(str);
 		}
@@ -386,7 +394,8 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 	* @requires wgContentLanguage
 	*/
 	lc.conv_text_from_dic = function (text, returnHTML) {
-		var	re_word_chars = RegExp( '([^' + lc.settings.word_chars + ']+)', '' ),
+		var i, j, len, num, ex,
+			re_word_chars = new RegExp( '([^' + lc.settings.word_chars + ']+)', '' ),
 			list = lc.reg_split( text, re_word_chars ),
 			hasChanged = null,
 			dict = lc.dictionary,
@@ -398,7 +407,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		}
 
 		outer_loop:
-		for ( var i = 0, len = list.length; i < len; i++ ) {
+		for ( i = 0, len = list.length; i < len; i += 1 ) {
 			w = list[i];
 			if (!w) {
 				continue;
@@ -409,12 +418,12 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 				// Try to match (lc.max_seq) consecutive words,
 				// then (lc.max_seq-1), ...
 				// then a single word
-				for ( var num = lc.settings.max_seq; num > 0; num-- ) {
+				for ( num = lc.settings.max_seq; num > 0; num -= 1 ) {
 					if ( len <= i + 2*(num-1) ) {
 						continue;
 					}
 
-					for ( var j = 1, ex = w; j < num; j++ ) {
+					for ( j = 1, ex = w; j < num; j += 1 ) {
 						ex += ' ' + list[i + 2*j];
 					}
 
@@ -477,9 +486,8 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		}
 		if ( hasChanged ) {
 			return text;
-		} else {
-			return null;
 		}
+		return null;
 	};
 
 	/**
@@ -487,15 +495,15 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 	* @param {Object} node The node whose text descendant nodes will be modernized
 	*/
 	lc.conv_node_from_dic = function ( node ) {
-		var	data, parent, sp,
-			showChanges = true || lc.show_changes;
+		var	data, parent, sp, i,
+			showChanges = true; // || lc.show_changes;
 		if ( node.nodeType === 3 ) {
 			data = lc.conv_text_from_dic( node.data, showChanges );
 			if( data ) {
 				$( node ).replaceWith( data );
 			}
 		} else {
-			for ( var i = 0; i < node.childNodes.length; i++ ) {
+			for ( i = 0; i < node.childNodes.length; i += 1 ) {
 				if ( node.id !== 'editform' && !node.className.match( lc.regClass ) ) {
 					lc.conv_node_from_dic( node.childNodes[i] );
 				}
@@ -515,14 +523,16 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		var	query, pages, pageids, page,
 			pagenames = lc.settings.global_dic_page[ lc.lang ],
 			sortable = [],
-			str, lines, data, li, h4, a,
+			str, lines, line, data, li, h4, a, v,
 			i, id, mm, match2, list, showChanges;
 		if ( !pagenames ){
 			alert( lc.getLocalMsg( 'error_missing_dict_name' ) + lc.lang );
+			// FIXME: Use the new 'jquery.spinner' module
+			// https://gerrit.wikimedia.org/r/gitweb?p=mediawiki/core.git;a=blob;f=resources/jquery/jquery.spinner.js;
 			removeSpinner( 'var-spinner' );
 			return false;
 		}
-        if( res ){
+		if( res ){
 			query = res.query;
 			if( query ){
 				pages = query.pages;
@@ -530,11 +540,13 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 			}
 			if ( !query || !pages || !pageids ){
 				mw.log( 'The API request returned incomplete data.' );
+				// FIXME: Use the new 'jquery.spinner' module
 				removeSpinner( 'var-spinner' );
 				return false;
 			}
 		} else {
 			mw.log( 'The API request returned no data.' );
+			// FIXME: Use the new 'jquery.spinner' module
 			removeSpinner( 'var-spinner' );
 			return false;
 		}
@@ -543,7 +555,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		}
 		pagenames = pagenames.split('|');
 
-		for (i = 0; i < pageids.length; i++) {
+		for (i = 0; i < pageids.length; i += 1 ) {
 			if( !pages[ pageids[i] ].pageid ){
 				alert( lc.getLocalMsg( 'error_missing_dict' ) + pages[ pageids[i] ].title );
 				continue;
@@ -558,10 +570,10 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		// Sort dictionaries in the given order
 		sortable.sort(function(a, b) {return a[1] - b[1];});
 
-		for ( i = 0; i < sortable.length; i++ ) {
+		for ( i = 0; i < sortable.length; i += 1 ) {
 			str = sortable[ i ][ 0 ];
 			lines = str.split('\n');
-			for( var line in lines ) {
+			for( line in lines ) {
 				//Current syntax: * old word : new word //Some comment
 				match2 = /^\*\s*(\S[^:]*?)\s*:\s*([\S].*?)\s*(?:\/\/.*?)?$/.exec( lines[line] );
 				if( match2 ) {
@@ -601,7 +613,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 
 		//Update menu links
 		list = lc.settings.variants_list;
-		for( var v in list ){
+		for( v in list ){
 			if ( list[v] === null ) {continue;}
 			li = document.getElementById( 'ca-conv-' + v );
 			if ( !li ) {continue;}
@@ -626,6 +638,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		}
 		$('#ca-conv-show-hide-changes').toggle( lc.lang !== mw.config.get( 'wgContentLanguage' ) );
 		lc.original_text = false;
+		// FIXME: Use the new 'jquery.spinner' module
 		removeSpinner( 'var-spinner' );
 		mw.log('Finished "lc.conv_callback" function');
 	};
@@ -636,11 +649,12 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 	*/
 	lc.startConversion = function ( l ){
 		mw.log('Started conversion to "' + l + '"');
-		var	ch, re, dicts, changes, change, api, type;
+		var ch, re, dicts, changes, change, api, type, x;
 
 		//if (undefined === l) l = lc.get_preferred_variant()
 		x = document.getElementById('p-variants-js');
 		if ( x ) {
+			// FIXME: Use the new 'jquery.spinner' module
 			injectSpinner(x, 'var-spinner');
 		}
 		lc.lang = l;
@@ -659,12 +673,12 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		}
 		if( changes ) {
 			if ( changes.constructor === Array ){
-				for ( ch = 0; ch < changes.length; ch++ ) {
+				for ( ch = 0; ch < changes.length; ch += 1 ) {
 					change = changes[ ch ];
 					if ( change.length !== 2 || change[1] === null ) {
 						continue;
 					}
-					if ( typeof change[0] == 'string' ) {
+					if ( typeof change[0] === 'string' ) {
 						change[0] = new RegExp( $.escapeRE( change[0] ), 'g' );
 					}
 					lc.regTypoChanges.push( change );
@@ -689,7 +703,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		dicts = lc.settings.global_dic_page[ lc.lang ];
 		if ( typeof dicts === 'object' ) {
 			api = dicts.api;
-			if ( typeof api === 'object' && api.length == 2 ) {
+			if ( typeof api === 'object' && api.length === 2 ) {
 				if ( lc.secure ) {
 					api = api[1];
 				} else {
@@ -714,7 +728,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 				'rvprop': 'content',
 				'indexpageids': '1'
 			},
-			success: LanguageConverter.conv_callback
+			success: lc.conv_callback
 		});
 		mw.log('Finished conversion');
 	};
@@ -752,7 +766,7 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		lc.settings = {
 			msg: {
 				error_missing_dict	 : 'The following dictionary was not found:\n',
-                error_missing_dict_name : 'It is necessary to define the page name of the dictionary for ',
+		error_missing_dict_name : 'It is necessary to define the page name of the dictionary for ',
 				error_word_processing	 : 'Error has occurred while processing the following word:\n',
 				error_typo_processing	 : 'Error has occurred while processing the following typographic change:\n',
 				help_page_link		 : 'Open help page',
@@ -769,13 +783,13 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 			/**
 			 * Typographic conversion (applied before dictionary conversion)
 			 */
-			typo_changes	 : { },
+			typo_changes	 : {},
 
 			/**
 			* Names of each language and/or variant to which conversion is enabled
 			* in the current wiki
 			*/
-			variants_list	 : { },
+			variants_list	 : {},
 
 			/**
 			* List of namespaces where conversion is enabled.
@@ -863,17 +877,18 @@ mw.log('LanguageConverter version is ' + window.LanguageConverter.version );
 		mw.log('Finished "lc.load" function');
 	};
 
-} )( window.LanguageConverter );
-
 mw.log('The loader function will be called once mw and mw.util are loaded');
-mw.loader.using( ['mediawiki', 'mediawiki.util'], function() {
+mw.loader.using( ['jquery.cookie', 'mediawiki.util'], function() {
 	mw.log(
 		'Loaded mw and mw.util (test: typeof mw.util.getParamValue=' +
 		typeof mw.util.getParamValue + '). Calling the loader now.'
 	);
-	$( LanguageConverter.load );
+	$( lc.load );
 } );
 
+// See also [[s:fr:MediaWiki:Gadget-mod.js]] and [[Wikisource:Scriptorium/Août_2009#typographie]]
 if(self.gadget_typographie && !self.gadget_mod2) {
-	$( LanguageConverter.conv_typo_document );
+	$( lc.conv_typo_document );
 }
+
+}( mediaWiki, jQuery, LanguageConverter ) );
