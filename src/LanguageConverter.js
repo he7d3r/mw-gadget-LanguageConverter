@@ -1,5 +1,5 @@
 /*jslint browser: true, white: true, todo: true, continue: true, forin: true, vars: true, devel: true, regexp: true */
-/*global jQuery, mediaWiki, LanguageConverter, self, removeSpinner, injectSpinner */
+/*global jQuery, mediaWiki, LanguageConverter, self */
 /**
  * Based on [[oldwikisource:MediaWiki:Modernisation.js]]
  * @author [[:fr:User:ThomasV]]
@@ -61,7 +61,7 @@ lc.version = '2.33';
 mw.log('LanguageConverter version is ' + lc.version );
 
 // The cookie used by Language Converter
-lc.cookie = mw.config.get( 'wgDBname' ) + '-lang-variant';
+lc.cookie = mw.config.get( 'wgCookiePrefix' ) + '-lang-variant';
 
 /**
 * Dictionary to be used during the conversion
@@ -527,9 +527,7 @@ lc.conv_callback = function ( res ) {
 		i, id, mm, match2, list, showChanges;
 	if ( !pagenames ){
 		alert( lc.getLocalMsg( 'error_missing_dict_name' ) + lc.lang );
-		// FIXME: Use the new 'jquery.spinner' module
-		// https://gerrit.wikimedia.org/r/gitweb?p=mediawiki/core.git;a=blob;f=resources/jquery/jquery.spinner.js;
-		removeSpinner( 'var-spinner' );
+		$.removeSpinner( 'var-spinner' );
 		return false;
 	}
 	if( res ){
@@ -540,14 +538,12 @@ lc.conv_callback = function ( res ) {
 		}
 		if ( !query || !pages || !pageids ){
 			mw.log( 'The API request returned incomplete data.' );
-			// FIXME: Use the new 'jquery.spinner' module
-			removeSpinner( 'var-spinner' );
+			$.removeSpinner( 'var-spinner' );
 			return false;
 		}
 	} else {
 		mw.log( 'The API request returned no data.' );
-		// FIXME: Use the new 'jquery.spinner' module
-		removeSpinner( 'var-spinner' );
+		$.removeSpinner( 'var-spinner' );
 		return false;
 	}
 	if ( typeof pagenames === 'object' ) {
@@ -638,8 +634,7 @@ lc.conv_callback = function ( res ) {
 	}
 	$('#ca-conv-show-hide-changes').toggle( lc.lang !== mw.config.get( 'wgContentLanguage' ) );
 	lc.original_text = false;
-	// FIXME: Use the new 'jquery.spinner' module
-	removeSpinner( 'var-spinner' );
+	$.removeSpinner( 'var-spinner' );
 	mw.log('Finished "lc.conv_callback" function');
 };
 
@@ -649,14 +644,11 @@ lc.conv_callback = function ( res ) {
 */
 lc.startConversion = function ( l ){
 	mw.log('Started conversion to "' + l + '"');
-	var ch, re, dicts, changes, change, api, type, x;
+	var ch, re, dicts, changes, change, api, type;
 
 	//if (undefined === l) l = lc.get_preferred_variant()
-	x = document.getElementById('p-variants-js');
-	if ( x ) {
-		// FIXME: Use the new 'jquery.spinner' module
-		injectSpinner(x, 'var-spinner');
-	}
+
+	$( '#p-variants-js' ).injectSpinner( { id: 'var-spinner' } );
 	lc.lang = l;
 	// The following is used to avoid conversion in places such as:
 	// * Spans created by the script itself
@@ -766,7 +758,7 @@ lc.load = function () {
 	lc.settings = {
 		msg: {
 			error_missing_dict	 : 'The following dictionary was not found:\n',
-	error_missing_dict_name : 'It is necessary to define the page name of the dictionary for ',
+			error_missing_dict_name	 : 'It is necessary to define the page name of the dictionary for ',
 			error_word_processing	 : 'Error has occurred while processing the following word:\n',
 			error_typo_processing	 : 'Error has occurred while processing the following typographic change:\n',
 			help_page_link		 : 'Open help page',
@@ -775,14 +767,14 @@ lc.load = function () {
 			menu_title		 : 'Variants'
 		},
 		/**
-			* TODO: Use by default some general regex for word bondaries, as in
-			* http://www.unicode.org/reports/tr29/#Default_Word_Boundaries
-			*/
+		* TODO: Use by default some general regex for word bondaries, as in
+		* http://www.unicode.org/reports/tr29/#Default_Word_Boundaries
+		*/
 		word_chars	 : 'a-zA-Z\'-',
 
 		/**
-			* Typographic conversion (applied before dictionary conversion)
-			*/
+		* Typographic conversion (applied before dictionary conversion)
+		*/
 		typo_changes	 : {},
 
 		/**
@@ -858,11 +850,11 @@ lc.load = function () {
 	lc.secure = location.protocol === 'https:';
 
 	/**
-		* Variant currently selected
-		* Used by {@link lc.render_navigation}, {@link lc.conv_typo_text},
-		* {@link lc.conv_text_from_dic}, {@link lc.conv_callback},
-		* {@link lc.startConversion} and {@link mod_lookup}
-		*/
+	* Variant currently selected
+	* Used by {@link lc.render_navigation}, {@link lc.conv_typo_text},
+	* {@link lc.conv_text_from_dic}, {@link lc.conv_callback},
+	* {@link lc.startConversion} and {@link mod_lookup}
+	*/
 	lc.lang = lc.get_preferred_variant();
 	mw.log('Prefered variant is "' + lc.lang + '"');
 	$.cookie( lc.cookie, lc.lang, {
@@ -878,7 +870,7 @@ lc.load = function () {
 };
 
 mw.log('The loader function will be called once mw and mw.util are loaded');
-mw.loader.using( ['jquery.cookie', 'mediawiki.util'], function() {
+mw.loader.using( [ 'mediawiki.util', 'jquery.cookie', 'jquery.spinner'], function() {
 	mw.log(
 		'Loaded mw and mw.util (test: typeof mw.util.getParamValue=' +
 		typeof mw.util.getParamValue + '). Calling the loader now.'
