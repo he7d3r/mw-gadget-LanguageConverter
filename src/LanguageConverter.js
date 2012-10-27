@@ -5,38 +5,6 @@
  * @author [[:fr:User:ThomasV]]
  * @author: [[User:Helder.wiki]]
  * @tracking: [[Special:GlobalUsage/User:Helder.wiki/Scripts/LanguageConverter.js]] ([[File:User:Helder.wiki/Scripts/LanguageConverter.js]])
- *
- * RELEASE NOTES:
- * Translation and addition of basic support to Portuguese;
- * Addition of "span" elements around converted text, for easy identification of changes (a basic "diff");
- * Adoption of menus on top, as in LanguageConverter.php, from MediaWiki;
- * Use of URL parameter "variant" to define the variant for conversion;
- * Support to multiple languages (like French, Norwegian, Portuguese and Galician);
- * Addition of error handling when converting each expression;
- * Better internal documentation, using conventions of from JSDoc;
- * Addition of a "spinner" during conversion;
- * Expansion of sets of characters (the "alphabets" used);
- * Support to comments in the end of lines in dictionary pages;
- * Addition of parameter to customize the set of pages where the script is enabled (by namespace and/or manual markup on individual pages);
- * Better support to conversion of strings with more than one word;
- * Optimization of some parts and some bug fixing;
- * Better support to creation of local dictionaries in specific pages;
- * Addition of link to help page (by wikiproject)
- * Use of jQuery in some places;
- * Better use of JavaScript objects and closures;
- * Support to dictionaries in external wikiprojects
- * Support to multiple dictionaries per variant/language (e.g. main and secundary dictionaries)
- * Use of a cookie to store the last variant selected (define jQuery.cookie if not defined)
- * Fixed conversion of text in spans created by the script itself
- * (Re)added monobook skin compatibility
- * Added class to disable conversion of some elements in a page
- * Regexes for typographic changes are created only when conversion starts (instead of recreated when converting each HTML element)
- * Updated to use MW 1.17 default JavaScript modules
- * Added some debug messages using mw.log
- * Replaced some functions by jQuery equivalents (e.g. $.extend to override settings, $.ajax to access the API)
- * Avoided conversion of the content of diffs
- * Escaped HTML and typo changes
- * Removed unused parameters
  */
 
 /**
