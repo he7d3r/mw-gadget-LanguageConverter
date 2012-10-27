@@ -57,7 +57,7 @@ mw.log('Loaded LanguageConverter.js source file');
 /**
  * Set the current version
  */
-lc.version = '2.33';
+lc.version = '2.35';
 mw.log('LanguageConverter version is ' + lc.version );
 
 // The cookie used by Language Converter
@@ -76,16 +76,16 @@ if ( lc.dictionary === undefined ) {
 lc.variant_links = {};
 
 /**
-* Indicates if the content of page wasn't converted yet
+* Indicates if the next conversion requires a page reload
 * Used by {@link lc.render_navigation} and {@link lc.conv_callback}
 */
-lc.original_text = true;
+lc.mustReload = false;
 
 /**
-	* Getter for localized messages. Precedence order:
-	* value from current variant, value from wgContentLanguage, english value.
-	* @requires wgContentLanguage
-	*/
+* Getter for localized messages. Precedence order:
+* value from current variant, value from wgContentLanguage, english value.
+* @requires wgContentLanguage
+*/
 lc.getLocalMsg = function ( name ) {
 	var	msgs = lc.settings.msg,
 		msg = msgs[name];
@@ -152,12 +152,46 @@ lc.toggle_visibility = function () {
 	// TODO: Consider the use of two variables: show_changes and enable_show_changes.
 	var show = !lc.settings.show_changes;
 	lc.settings.show_changes = show;
-	$('#content').toggleClass('show-changes', show);
-	$('#ca-conv-show-hide-changes > a').text(
+	lc.$target.toggleClass('show-changes', show);
+	$('#ca-conv-show-hide-changes').find('a').text(
 		show?
 		lc.getLocalMsg( 'hide_changes_link' ) :
 		lc.getLocalMsg( 'show_changes_link' )
 	);
+};
+/**
+ * @requires wgScript, wgPageName, wgContentLanguage
+ */
+lc.createPortlet = function () {
+	var skin = mw.config.get( 'skin' ),
+		$newPortlet;
+	// Create a new portlet for this script
+	// FIXME: Does this works for skins different from vector/monobook?
+	$newPortlet = $( skin === 'vector' ? '#p-cactions' : '#p-tb' )
+		.clone()
+			.attr( 'id', 'p-variants-js' )
+			.find( 'li' )
+				.remove().end();
+	switch( skin ) {
+		case 'vector':
+			$newPortlet
+				.addClass( 'emptyPortlet' )
+				.find('span')
+					.text( lc.getLocalMsg( 'menu_title' ) ).end()
+				.appendTo( '#left-navigation' );
+
+			if ( lc.settings.show_menu_title ) {
+				$( '<h4>' )
+					.addClass( 'flag-' + lc.lang )
+					.prependTo( $newPortlet );
+			}
+			break;
+		default:
+			$newPortlet
+				.find( 'h5' )
+					.text( lc.getLocalMsg( 'menu_title' ) ).end()
+				.insertBefore( '#p-tb' );
+	}
 };
 
 /**
@@ -167,102 +201,64 @@ lc.toggle_visibility = function () {
 lc.render_navigation = function () {
 	mw.log('Started rendering of navigation');
 	var	list = lc.settings.variants_list,
-		v, show, lnk, html, lnav, lclist, newPortlet, ptb;
+		show = lc.settings.show_changes,
+		skin = mw.config.get( 'skin' ),
+		v, isSelected,
+		getClickHandler = function( v ){
+			return function ( e ) {
+				e.preventDefault();
+				if ( v !== lc.lang ) {
+					if ( lc.mustReload ) {
+						window.location.href = mw.util.wikiGetlink() + '?variant=' + v;
+					} else {
+						lc.startConversion( v );
+					}
+				}
+			};
+		};
+
+	lc.$target.toggleClass('show-changes', show);
+
+	lc.createPortlet();
 	for( v in list ){
 		if ( list[v] === null ) {
 			continue;
 		}
-		lc.variant_links[v] = {};
-		//TODO: Use "with lc.variant_links[v]" or a local variable...
-		lc.variant_links[v].text = list[v];
-		if ( v === lc.lang ) {
-			lc.variant_links[v].sel = true;
-			lc.variant_links[v].href = '#';
-		} else {
-			lc.variant_links[v].sel = false;
-			// Only use the current HTML if the text wasn't converted yet
-			// (may have better results?)
-			lc.variant_links[v].href = lc.original_text ?
-				'javascript:LanguageConverter.startConversion(\'' + v + '\');' :
-				mw.util.wikiGetlink( mw.config.get( 'wgPageName' ) ) + '?variant=' + v;
+		isSelected = v === lc.lang && skin === 'vector';
+		$( mw.util.addPortletLink(
+			'p-variants-js',
+			'#',
+			list[v],
+			'ca-conv-' + v
+		) )
+		.toggleClass( 'selected', isSelected )
+		.click( getClickHandler ( v ) );
+		if ( isSelected ) {
+			$( '#p-variants-js' ).find( 'h4' ).text( list[v] );
 		}
 	}
 	if ( lc.settings.help_page && lc.getLocalMsg( 'help_page_link' ) ) {
-		lc.variant_links['help-page'] = {
-			'text' : lc.getLocalMsg( 'help_page_link' ),
-			'sel' : false,
-			'href' : mw.util.wikiGetlink( lc.settings.help_page )
-		};
+		mw.util.addPortletLink(
+			'p-variants-js',
+			mw.util.wikiGetlink( lc.settings.help_page ),
+			lc.getLocalMsg( 'help_page_link' ),
+			'ca-conv-help-page'
+		);
 	}
-	show = lc.settings.show_changes;
 	if ( lc.getLocalMsg( 'show_changes_link' ) && lc.getLocalMsg( 'hide_changes_link' ) ) {
-		lc.variant_links['show-hide-changes'] = {
-			'text' : show? lc.getLocalMsg( 'hide_changes_link' ) : lc.getLocalMsg( 'show_changes_link' ),
-			'sel' : false,
-			'href' : 'javascript:LanguageConverter.toggle_visibility();'
-		};
+		$( mw.util.addPortletLink(
+			'p-variants-js',
+			'#',
+			show? lc.getLocalMsg( 'hide_changes_link' ) : lc.getLocalMsg( 'show_changes_link' ),
+			'ca-conv-show-hide-changes'
+		) )
+		.click( function ( e ) {
+			e.preventDefault();
+			lc.toggle_visibility();
+		} );
 	}
-	$('#content').toggleClass('show-changes', show);
-	switch( mw.config.get( 'skin' ) ) {
-		case 'vector':
-			lnav = document.getElementById('left-navigation');
-
-			html = '<div id="p-variants-js" class="vectorMenu">';
-			if ( lc.settings.show_menu_title ) {
-				html += '<h4 class="flag-' + lc.lang + '">';
-				for( v in lc.variant_links ){
-					lnk = lc.variant_links[v];
-					if ( lnk.sel ) {
-						html += lnk.text;
-						continue;
-					}
-				}
-				html += '</h4>';
-			}
-			html += '<h5><span>' + lc.getLocalMsg( 'menu_title' ) +
-				'</span><a href="#"></a></h5><div class="menu"><ul>';
-			for( v in lc.variant_links ){
-				lnk = lc.variant_links[v];
-				html += '<li id="ca-conv-' + v + '"';
-				if ( lnk.sel ) {
-					html += ' class="selected"';
-				}
-				html += '><a href="' + lnk.href + '">' + lnk.text + '</a></li>';
-			}
-			html += '</ul></div></div>';
-			lnav.innerHTML += html;
-			break;
-		case 'monobook':
-			/**
-			* Create a new Portlet section for monobook skin
-			* @author Based on function get_optlist() from
-			* http://wikisource.org/wiki/MediaWiki:Base.js
-			* and function toolbox() from skins/MonoBook.php
-			*/
-			lclist = document.getElementById( 'p-variants-js' );
-
-			html = '<h5>' + lc.getLocalMsg( 'menu_title' ) +
-				'<\/h5><div class="pBody"><ul>';
-			for( v in lc.variant_links ){
-				lnk = lc.variant_links[v];
-				html += '<li id="ca-conv-' + v + '"><a href="' +
-					lnk.href + '">' + lnk.text + '</a></li>';
-			}
-			html += '</ul><\/div>';
-			if( !lclist ) {
-				newPortlet = document.createElement( 'div' );
-				newPortlet.className = 'portlet';
-				newPortlet.innerHTML = html;
-				newPortlet.setAttribute( 'id', 'p-variants-js' );
-				newPortlet.id = 'p-variants-js';
-				ptb = document.getElementById('p-tb');
-				ptb.parentNode.insertBefore( newPortlet, ptb);
-			}
-			break;
-		default:
-			//Currently, other skins are not supported
-	}
-	$('#ca-conv-show-hide-changes').toggle( lc.lang !== mw.config.get( 'wgContentLanguage' ) );
+	$('#ca-conv-show-hide-changes')
+		.toggle( lc.lang !== mw.config.get( 'wgContentLanguage' ) );
 	mw.log('Finished rendering of navigation');
 };
 
@@ -315,7 +311,7 @@ lc.conv_typo_document = function () {
 		return;
 	}
 	document.title = lc.conv_typo_text( document.title );
-	lc.conv_typo_node( document.getElementById('content') );
+	lc.conv_typo_node( lc.$target[0] );
 	mw.log('Finished "lc.conv_typo_document" function');
 };
 
@@ -523,7 +519,8 @@ lc.conv_callback = function ( res ) {
 	var	query, pages, pageids,
 		pagenames = lc.settings.global_dic_page[ lc.lang ],
 		sortable = [],
-		str, lines, line, data, li, h4, a, v,
+		skin = mw.config.get( 'skin' ),
+		str, lines, line, data, $h4, v,
 		i, id, mm, match2, list, showChanges;
 	if ( !pagenames ){
 		alert( lc.getLocalMsg( 'error_missing_dict_name' ) + lc.lang );
@@ -554,6 +551,7 @@ lc.conv_callback = function ( res ) {
 	for (i = 0; i < pageids.length; i += 1 ) {
 		if( !pages[ pageids[i] ].pageid ){
 			alert( lc.getLocalMsg( 'error_missing_dict' ) + pages[ pageids[i] ].title );
+			window.location.href = mw.util.wikiGetlink() + '?variant=' + mw.config.get( 'wgContentLanguage' );
 			continue;
 		}
 
@@ -562,6 +560,11 @@ lc.conv_callback = function ( res ) {
 			pagenames.indexOf(pages[ pageids[i] ].title) //Order of page
 			//,pages[ pageids[i] ].title //Title of page
 		]);
+	}
+	if ( !sortable.length ){
+		$.removeSpinner( 'var-spinner' );
+		mw.log('Finished "lc.conv_callback" function');
+		return;
 	}
 	// Sort dictionaries in the given order
 	sortable.sort(function(a, b) {return a[1] - b[1];});
@@ -605,35 +608,23 @@ lc.conv_callback = function ( res ) {
 	if ( data ) {
 		document.title = data;
 	}
-	lc.conv_node_from_dic( document.getElementById('content') );
+	lc.conv_node_from_dic( lc.$target[0] );
 
-	//Update menu links
+	// Update menu links
 	list = lc.settings.variants_list;
 	for( v in list ){
-		if ( list[v] === null ) {continue;}
-		li = document.getElementById( 'ca-conv-' + v );
-		if ( !li ) {continue;}
-		a = li.firstChild;
-		if ( !a ) {continue;}
-		if( v === lc.lang ) {
-			li.className = 'selected';
-			a.href = '#';
-		} else {
-			li.className = '';
-			//If already converted, it is better reload the page
-			a.href = mw.util.wikiGetlink( mw.config.get( 'wgPageName' ) ) +
-				'?variant=' + v;
+		if ( list[v] !== null ) {
+			$( '#ca-conv-' + v )
+				.toggleClass( 'selected', v === lc.lang && skin === 'vector' );
 		}
 	}
 	if ( lc.settings.show_menu_title ) {
-		h4 = document.getElementById('p-variants-js').firstChild;
-		if ( h4 ) {
-			h4.innerHTML = list[lc.lang];
-			h4.className = 'flag-' + lc.lang;
-		}
+		$h4 = $('#p-variants-js').find('h4')
+			.text( list[lc.lang] )
+			.attr( 'class', 'flag-' + lc.lang );
 	}
 	$('#ca-conv-show-hide-changes').toggle( lc.lang !== mw.config.get( 'wgContentLanguage' ) );
-	lc.original_text = false;
+	lc.mustReload = true;
 	$.removeSpinner( 'var-spinner' );
 	mw.log('Finished "lc.conv_callback" function');
 };
@@ -646,8 +637,11 @@ lc.startConversion = function ( l ){
 	mw.log('Started conversion to "' + l + '"');
 	var ch, re, dicts, changes, change, api, type;
 
+	if ( l === mw.config.get( 'wgContentLanguage' ) ) {
+		mw.log('Nothing to convert. Returned.');
+		return false;
+	}
 	//if (undefined === l) l = lc.get_preferred_variant()
-
 	$( '#p-variants-js' ).injectSpinner( { id: 'var-spinner' } );
 	lc.lang = l;
 	// The following is used to avoid conversion in places such as:
@@ -848,6 +842,10 @@ lc.load = function () {
 		return;
 	}
 	lc.secure = location.protocol === 'https:';
+	lc.$target = $( '#content' );
+	if( !lc.$target.length ) {
+		lc.$target = $( '#mw-content-text' );
+	}
 
 	/**
 	* Variant currently selected
@@ -863,9 +861,7 @@ lc.load = function () {
 		secure: lc.secure
 	} );
 	lc.render_navigation();
-	if ( lc.lang !== mw.config.get( 'wgContentLanguage' ) ) {
-		lc.startConversion( lc.lang );
-	}
+	lc.startConversion( lc.lang );
 	mw.log('Finished "lc.load" function');
 };
 
