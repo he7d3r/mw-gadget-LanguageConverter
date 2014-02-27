@@ -106,9 +106,9 @@ lc.get_cookie_variant = function () {
 * @requires wgContentLanguage
 */
 lc.get_preferred_variant = function () {
-	var req = lc.get_URL_variant()
-		|| lc.get_cookie_variant()
-		|| mw.config.get( 'wgContentLanguage' );
+	var req = lc.get_URL_variant() ||
+		lc.get_cookie_variant() ||
+		mw.config.get( 'wgContentLanguage' );
 
 	return req;
 };
@@ -131,16 +131,16 @@ lc.toggle_visibility = function () {
  * @requires wgScript, wgPageName, wgContentLanguage
  */
 lc.createPortlet = function () {
-	var skin = mw.config.get( 'skin' ),
+	var sk = mw.config.get( 'skin' ),
 		$newPortlet;
 	// Create a new portlet for this script
 	// FIXME: Does this works for skins different from vector/monobook?
-	$newPortlet = $( skin === 'vector' ? '#p-cactions' : '#p-tb' )
+	$newPortlet = $( sk === 'vector' ? '#p-cactions' : '#p-tb' )
 		.clone()
 			.attr( 'id', 'p-variants-js' )
 			.find( 'li' )
 				.remove().end();
-	switch( skin ) {
+	switch( sk ) {
 		case 'vector':
 			$newPortlet
 				.addClass( 'emptyPortlet' )
@@ -170,14 +170,14 @@ lc.render_navigation = function () {
 	mw.log('Started rendering of navigation');
 	var	list = lc.settings.variants_list,
 		show = lc.settings.show_changes,
-		skin = mw.config.get( 'skin' ),
+		sk = mw.config.get( 'skin' ),
 		v, isSelected,
 		getClickHandler = function( v ){
 			return function ( e ) {
 				e.preventDefault();
 				if ( v !== lc.lang ) {
 					if ( lc.mustReload ) {
-						window.location.href = mw.util.wikiGetlink() + '?variant=' + v;
+						window.location.href = mw.util.getUrl( null, { variant: v } );
 					} else {
 						lc.startConversion( v );
 					}
@@ -192,7 +192,7 @@ lc.render_navigation = function () {
 		if ( list[v] === null ) {
 			continue;
 		}
-		isSelected = v === lc.lang && skin === 'vector';
+		isSelected = v === lc.lang && sk === 'vector';
 		$( mw.util.addPortletLink(
 			'p-variants-js',
 			'#',
@@ -208,7 +208,7 @@ lc.render_navigation = function () {
 	if ( lc.settings.help_page && lc.getLocalMsg( 'help_page_link' ) ) {
 		mw.util.addPortletLink(
 			'p-variants-js',
-			mw.util.wikiGetlink( lc.settings.help_page ),
+			mw.util.getUrl( lc.settings.help_page ),
 			lc.getLocalMsg( 'help_page_link' ),
 			'ca-conv-help-page'
 		);
@@ -487,7 +487,7 @@ lc.conv_callback = function ( res ) {
 	var	query, pages, pageids,
 		pagenames = lc.settings.global_dic_page[ lc.lang ],
 		sortable = [],
-		skin = mw.config.get( 'skin' ),
+		sk = mw.config.get( 'skin' ),
 		str, lines, line, data, $h4, v,
 		i, id, mm, match2, list, showChanges;
 	if ( !pagenames ){
@@ -519,7 +519,7 @@ lc.conv_callback = function ( res ) {
 	for (i = 0; i < pageids.length; i += 1 ) {
 		if( !pages[ pageids[i] ].pageid ){
 			alert( lc.getLocalMsg( 'error_missing_dict' ) + pages[ pageids[i] ].title );
-			window.location.href = mw.util.wikiGetlink() + '?variant=' + mw.config.get( 'wgContentLanguage' );
+			window.location.href = mw.util.getUrl( null, { variant: mw.config.get( 'wgContentLanguage' ) } );
 			continue;
 		}
 
@@ -583,7 +583,7 @@ lc.conv_callback = function ( res ) {
 	for( v in list ){
 		if ( list[v] !== null ) {
 			$( '#ca-conv-' + v )
-				.toggleClass( 'selected', v === lc.lang && skin === 'vector' );
+				.toggleClass( 'selected', v === lc.lang && sk === 'vector' );
 		}
 	}
 	if ( lc.settings.show_menu_title ) {
@@ -719,31 +719,31 @@ lc.load = function () {
 	mw.log('Started "lc.load" function');
 	lc.settings = {
 		msg: {
-			error_missing_dict	 : 'The following dictionary was not found:\n',
-			error_missing_dict_name	 : 'It is necessary to define the page name of the dictionary for ',
-			error_word_processing	 : 'Error has occurred while processing the following word:\n',
-			error_typo_processing	 : 'Error has occurred while processing the following typographic change:\n',
-			help_page_link		 : 'Open help page',
-			show_changes_link	 : 'Show changes',
-			hide_changes_link	 : 'Hide changes',
-			menu_title		 : 'Variants'
+			error_missing_dict: 'The following dictionary was not found:\n',
+			error_missing_dict_name: 'It is necessary to define the page name of the dictionary for ',
+			error_word_processing: 'Error has occurred while processing the following word:\n',
+			error_typo_processing: 'Error has occurred while processing the following typographic change:\n',
+			help_page_link: 'Open help page',
+			show_changes_link: 'Show changes',
+			hide_changes_link: 'Hide changes',
+			menu_title: 'Variants'
 		},
 		/**
 		* TODO: Use by default some general regex for word bondaries, as in
 		* http://www.unicode.org/reports/tr29/#Default_Word_Boundaries
 		*/
-		word_chars	 : 'a-zA-Z\'-',
+		word_chars: 'a-zA-Z\'-',
 
 		/**
 		* Typographic conversion (applied before dictionary conversion)
 		*/
-		typo_changes	 : {},
+		typo_changes: {},
 
 		/**
 		* Names of each language and/or variant to which conversion is enabled
 		* in the current wiki
 		*/
-		variants_list	 : {},
+		variants_list: {},
 
 		/**
 		* List of namespaces where conversion is enabled.
@@ -753,53 +753,53 @@ lc.load = function () {
 		* @see lc.selection_mode
 		* @see lc.local_dic_id
 		*/
-		ns_list		 : { 0 : true },
+		ns_list: { 0 : true },
 
 		/**
 		* Id used in template or wikitext to enable conversion to some variant
 		* @see lc.ns_list
 		* @see lc.selection_mode
 		*/
-		local_dic_id	 : 'modernization',
+		local_dic_id: 'modernization',
 
 		/**
 		* Class used in template or wikitext to disable conversion
 		* of the content inside of an HTML element
 		*/
-		no_conversion_class : 'no-conversion',
+		no_conversion_class: 'no-conversion',
 
 		/**
 		* Page of current wiki where the dictionaries for each variant should be defined
 		*/
-		global_dic_page	 : 'Project:Dictionary',
+		global_dic_page: 'Project:Dictionary',
 
 		/**
 		* Help page about the conversion system, for each wiki
 		*/
-		help_page	 : 'Project:Language Converter',
+		help_page: 'Project:Language Converter',
 
 		/**
 		* Enables the addition of a span around each converted expression
 		* (for dictionary, not typographic conversion)
 		*/
-		show_changes	 : false,
+		show_changes: false,
 
 		/**
 		* Enables the exibition of the text of selected item in the menu title
 		*/
-		show_menu_title	 : true,
+		show_menu_title: true,
 
 		/**
 		* Defines how to select pages where the conversion is enabled
 		* @see lc.ns_list
 		* @see lc.local_dic_id
 		*/
-		selection_mode	 : 'AND',
+		selection_mode: 'AND',
 
 		/**
 		* How many words in sequence can be converted as a "phrase"
 		*/
-		max_seq		 : 3
+		max_seq: 3
 	};
 
 	//Override default settings above by specific wiki configuration, if any
