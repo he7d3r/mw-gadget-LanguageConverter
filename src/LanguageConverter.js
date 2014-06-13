@@ -11,7 +11,7 @@
  * Setup the Language Converter global:
  */
 if ( window.LanguageConverter === undefined ) {
-    window.LanguageConverter = {};
+	window.LanguageConverter = {};
 }
 
 /**
@@ -133,29 +133,31 @@ lc.toggle_visibility = function () {
 lc.createPortlet = function () {
 	var sk = mw.config.get( 'skin' ),
 		$newPortlet;
-	// Create a new portlet for this script
-	// FIXME: Does this works for skins different from vector/monobook?
-	$newPortlet = $( sk === 'vector' ? '#p-cactions' : '#p-tb' )
-		.clone()
-			.attr( 'id', 'p-variants-js' )
-			.find( 'li' )
-				.remove().end();
 	switch( sk ) {
 		case 'vector':
-			$newPortlet
-				.addClass( 'emptyPortlet' )
-				.find('span')
-					.text( lc.getLocalMsg( 'menu_title' ) ).end()
-				.appendTo( '#left-navigation' );
-
-			if ( lc.settings.show_menu_title ) {
-				$( '<h4>' )
+			// Create a new portlet for this script
+			$newPortlet = $( '#p-cactions' )
+				.clone()
+					.find( 'li' )
+						.remove()
+						.end()
+				.attr( {
+					'id': 'p-variants-js',
+					'class': 'vectorMenu emptyPortlet'
+				} )
+				.find( 'span' )
+					.text( lc.getLocalMsg( 'menu_title' ) )
 					.addClass( 'flag-' + lc.lang )
-					.prependTo( $newPortlet );
-			}
+					.end()
+				.appendTo( '#left-navigation' );
 			break;
 		default:
-			$newPortlet
+			// Create a new portlet for this script
+			$newPortlet = $( '#p-tb' )
+				.clone()
+					.attr( 'id', 'p-variants-js' )
+					.find( 'li' )
+						.remove().end()
 				.find( 'h5' )
 					.text( lc.getLocalMsg( 'menu_title' ) ).end()
 				.insertBefore( '#p-tb' );
@@ -202,7 +204,7 @@ lc.render_navigation = function () {
 		.toggleClass( 'selected', isSelected )
 		.click( getClickHandler ( v ) );
 		if ( isSelected ) {
-			$( '#p-variants-js' ).find( 'h4' ).text( list[v] );
+			$( '#p-variants-js' ).find( 'span' ).text( list[v] );
 		}
 	}
 	if ( lc.settings.help_page && lc.getLocalMsg( 'help_page_link' ) ) {
@@ -488,7 +490,7 @@ lc.conv_callback = function ( res ) {
 		pagenames = lc.settings.global_dic_page[ lc.lang ],
 		sortable = [],
 		sk = mw.config.get( 'skin' ),
-		str, lines, line, data, $h4, v,
+		str, lines, line, data, v,
 		i, id, mm, match2, list, showChanges;
 	if ( !pagenames ){
 		alert( lc.getLocalMsg( 'error_missing_dict_name' ) + lc.lang );
@@ -587,9 +589,10 @@ lc.conv_callback = function ( res ) {
 		}
 	}
 	if ( lc.settings.show_menu_title ) {
-		$h4 = $('#p-variants-js').find('h4')
-			.text( list[lc.lang] )
-			.attr( 'class', 'flag-' + lc.lang );
+		$( '#p-variants-js' )
+			.find( 'span' )
+				.text( list[lc.lang] )
+				.attr( 'class', 'flag-' + lc.lang );
 	}
 	$('#ca-conv-show-hide-changes').toggle( lc.lang !== mw.config.get( 'wgContentLanguage' ) );
 	lc.mustReload = true;
