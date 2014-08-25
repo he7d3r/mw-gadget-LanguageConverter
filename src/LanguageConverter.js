@@ -837,13 +837,10 @@ lc.load = function () {
 };
 
 mw.log('The loader function will be called once mw and mw.util are loaded');
-mw.loader.using( [ 'mediawiki.util', 'jquery.cookie', 'jquery.spinner'], function() {
-	mw.log(
-		'Loaded mw and mw.util (test: typeof mw.util.getParamValue=' +
-		typeof mw.util.getParamValue + '). Calling the loader now.'
-	);
-	$( lc.load );
-} );
+$.when(
+	mw.loader.using( [ 'mediawiki.util', 'jquery.cookie', 'jquery.spinner'] ),
+	$.ready
+).then( lc.load );
 
 // See also [[s:fr:MediaWiki:Gadget-mod.js]] and [[Wikisource:Scriptorium/Août_2009#typographie]]
 if(self.gadget_typographie && !self.gadget_mod2) {
