@@ -847,4 +847,4 @@ if(self.gadget_typographie && !self.gadget_mod2) {
 	$( lc.conv_typo_document );
 }
 
-}( mediaWiki, jQuery, LanguageConverter ) );
+}( mediaWiki, jQuery, window.LanguageConverter ) );
