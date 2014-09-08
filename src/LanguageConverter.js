@@ -239,9 +239,10 @@ lc.render_navigation = function () {
 lc.conv_typo_text = function ( text ) {
 	var	ch,
 		rule,
-		max = lc.regTypoChanges.length;
+                changes = lc.settings.typo_changes[lc.lang],
+		max = changes.length;
 	for ( ch = 0 ; ch < max; ch += 1 ) {
-		rule = lc.regTypoChanges[ch];
+		rule = change[ch];
 		try {
 			text = text.replace( rule[0], rule[1] );
 		} catch( err ) {
