@@ -840,11 +840,13 @@ mw.log('The loader function will be called once mw and mw.util are loaded');
 $.when(
 	mw.loader.using( [ 'mediawiki.util', 'jquery.cookie', 'jquery.spinner'] ),
 	$.ready
-).then( lc.load );
+).then( function () {
+	lc.load();
+	// See also [[s:fr:MediaWiki:Gadget-mod.js]] and [[Wikisource:Scriptorium/Août_2009#typographie]]
+	if (self.gadget_typographie && !self.gadget_mod2) {
+		lc.conv_typo_document();
+	}
+});
 
-// See also [[s:fr:MediaWiki:Gadget-mod.js]] and [[Wikisource:Scriptorium/Août_2009#typographie]]
-if(self.gadget_typographie && !self.gadget_mod2) {
-	$( lc.conv_typo_document );
-}
 
 }( mediaWiki, jQuery, window.LanguageConverter ) );
