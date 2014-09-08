@@ -242,7 +242,7 @@ lc.conv_typo_text = function ( text ) {
                 changes = lc.settings.typo_changes[lc.lang],
 		max = changes.length;
 	for ( ch = 0 ; ch < max; ch += 1 ) {
-		rule = change[ch];
+		rule = changes[ch];
 		try {
 			text = text.replace( rule[0], rule[1] );
 		} catch( err ) {
