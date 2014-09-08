@@ -239,10 +239,9 @@ lc.render_navigation = function () {
 lc.conv_typo_text = function ( text ) {
 	var	ch,
 		rule,
-                changes = lc.settings.typo_changes[lc.lang],
-		max = changes.length;
+		max = lc.regTypoChanges.length;
 	for ( ch = 0 ; ch < max; ch += 1 ) {
-		rule = changes[ch];
+		rule = lc.regTypoChanges[ch];
 		try {
 			text = text.replace( rule[0], rule[1] );
 		} catch( err ) {
@@ -609,12 +608,7 @@ lc.startConversion = function ( l ){
 	mw.log('Started conversion to "' + l + '"');
 	var ch, re, dicts, changes, change, api, type;
 
-	if ( l === mw.config.get( 'wgContentLanguage' ) ) {
-		mw.log('Nothing to convert. Returned.');
-		return false;
-	}
 	//if (undefined === l) l = lc.get_preferred_variant()
-	$( '#p-variants-js' ).injectSpinner( { id: 'var-spinner' } );
 	lc.lang = l;
 	// The following is used to avoid conversion in places such as:
 	// * Spans created by the script itself
@@ -658,6 +652,14 @@ lc.startConversion = function ( l ){
 			}
 		}
 	}
+
+	if ( l === mw.config.get( 'wgContentLanguage' ) ) {
+		mw.log('Nothing to convert. Returned.');
+		return false;
+	}
+
+	$( '#p-variants-js' ).injectSpinner( { id: 'var-spinner' } );
+
 	dicts = lc.settings.global_dic_page[ lc.lang ];
 	if ( typeof dicts === 'object' ) {
 		api = dicts.api;
