@@ -5,7 +5,8 @@
  * @author [[:fr:User:ThomasV]]
  * @author: Helder (https://github.com/he7d3r)
  * @license: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
- * @tracking: [[Special:GlobalUsage/User:He7d3r/Tools/LanguageConverter.js]] ([[File:User:He7d3r/Tools/LanguageConverter.js]])
+ * @tracking: [[Special:GlobalUsage/User:He7d3r/Tools/LanguageConverter.js]]
+ * [[File:User:He7d3r/Tools/LanguageConverter.js]] (see [[bugzilla:33355]])
  */
 
 /**
