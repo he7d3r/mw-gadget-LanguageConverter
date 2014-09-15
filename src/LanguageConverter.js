@@ -3,8 +3,9 @@
 /**
  * Based on [[oldwikisource:MediaWiki:Modernisation.js]]
  * @author [[:fr:User:ThomasV]]
- * @author: [[User:Helder.wiki]]
- * @tracking: [[Special:GlobalUsage/User:Helder.wiki/Scripts/LanguageConverter.js]] ([[File:User:Helder.wiki/Scripts/LanguageConverter.js]])
+ * @author: Helder (https://github.com/he7d3r)
+ * @license: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
+ * @tracking: [[Special:GlobalUsage/User:He7d3r/Tools/LanguageConverter.js]] ([[File:User:He7d3r/Tools/LanguageConverter.js]])
  */
 
 /**
