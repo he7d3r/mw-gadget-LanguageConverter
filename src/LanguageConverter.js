@@ -181,7 +181,7 @@ lc.render_navigation = function () {
 				e.preventDefault();
 				if ( v !== lc.lang ) {
 					if ( lc.mustReload ) {
-						window.location.href = mw.util.getUrl( null, { variant: v } );
+						location.href = mw.util.getUrl( null, { variant: v } );
 					} else {
 						lc.startConversion( v );
 					}
@@ -523,7 +523,7 @@ lc.conv_callback = function ( res ) {
 	for (i = 0; i < pageids.length; i += 1 ) {
 		if( !pages[ pageids[i] ].pageid ){
 			alert( lc.getLocalMsg( 'error_missing_dict' ) + pages[ pageids[i] ].title );
-			window.location.href = mw.util.getUrl( null, { variant: mw.config.get( 'wgContentLanguage' ) } );
+			location.href = mw.util.getUrl( null, { variant: mw.config.get( 'wgContentLanguage' ) } );
 			continue;
 		}
 
