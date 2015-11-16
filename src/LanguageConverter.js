@@ -22,13 +22,10 @@ if ( window.LanguageConverter === undefined ) {
 ( function ( mw, $, lc ) {
 'use strict';
 
-mw.log('Loaded LanguageConverter.js source file');
-
 /**
  * Set the current version
  */
 lc.version = '2.35';
-mw.log('LanguageConverter version is ' + lc.version );
 
 // The cookie used by Language Converter
 lc.cookie = mw.config.get( 'wgCookiePrefix' ) + '-lang-variant';
@@ -171,7 +168,6 @@ lc.createPortlet = function () {
 * @requires wgScript, wgPageName, wgContentLanguage
 */
 lc.render_navigation = function () {
-	mw.log('Started rendering of navigation');
 	var	list = lc.settings.variants_list,
 		show = lc.settings.show_changes,
 		sk = mw.config.get( 'skin' ),
@@ -231,7 +227,6 @@ lc.render_navigation = function () {
 	}
 	$('#ca-conv-show-hide-changes')
 		.toggle( lc.lang !== mw.config.get( 'wgContentLanguage' ) );
-	mw.log('Finished rendering of navigation');
 };
 
 /**
@@ -277,14 +272,11 @@ lc.conv_typo_node = function ( node ) {
 * Modernize the typography of the document content
 */
 lc.conv_typo_document = function () {
-	mw.log('Started "lc.conv_typo_document" function');
 	if ( !lc.isAllowed() ) {
-		mw.log('Language converter is not allowed on this page. Returning');
 		return;
 	}
 	document.title = lc.conv_typo_text( document.title );
 	lc.conv_typo_node( lc.$target[0] );
-	mw.log('Finished "lc.conv_typo_document" function');
 };
 
 /**
@@ -485,7 +477,6 @@ lc.conv_node_from_dic = function ( node ) {
 * @requires wgContentLanguage
 */
 lc.conv_callback = function ( res ) {
-	mw.log('Started "lc.conv_callback" function');
 	lc.conv_typo_document();
 
 	var	query, pages, pageids,
@@ -506,12 +497,10 @@ lc.conv_callback = function ( res ) {
 			pageids = query.pageids;
 		}
 		if ( !query || !pages || !pageids ){
-			mw.log( 'The API request returned incomplete data.' );
 			$.removeSpinner( 'var-spinner' );
 			return false;
 		}
 	} else {
-		mw.log( 'The API request returned no data.' );
 		$.removeSpinner( 'var-spinner' );
 		return false;
 	}
@@ -535,7 +524,6 @@ lc.conv_callback = function ( res ) {
 	}
 	if ( !sortable.length ){
 		$.removeSpinner( 'var-spinner' );
-		mw.log('Finished "lc.conv_callback" function');
 		return;
 	}
 	// Sort dictionaries in the given order
@@ -599,7 +587,6 @@ lc.conv_callback = function ( res ) {
 	$('#ca-conv-show-hide-changes').toggle( lc.lang !== mw.config.get( 'wgContentLanguage' ) );
 	lc.mustReload = true;
 	$.removeSpinner( 'var-spinner' );
-	mw.log('Finished "lc.conv_callback" function');
 };
 
 /**
@@ -607,7 +594,6 @@ lc.conv_callback = function ( res ) {
 * @param {string} l The language code
 */
 lc.startConversion = function ( l ){
-	mw.log('Started conversion to "' + l + '"');
 	var ch, re, dicts, changes, change, api, type;
 
 	//if (undefined === l) l = lc.get_preferred_variant()
@@ -633,7 +619,7 @@ lc.startConversion = function ( l ){
 					continue;
 				}
 				if ( typeof change[0] === 'string' ) {
-					change[0] = new RegExp( $.escapeRE( change[0] ), 'g' );
+					change[0] = new RegExp( mw.RegExp.escape( change[0] ), 'g' );
 				}
 				lc.regTypoChanges.push( change );
 			}
@@ -643,7 +629,7 @@ lc.startConversion = function ( l ){
 					continue;
 				}
 				try {
-					re = new RegExp( $.escapeRE( ch ), 'g' );
+					re = new RegExp( mw.RegExp.escape( ch ), 'g' );
 					lc.regTypoChanges.push( [ re, changes[ ch ] ] );
 				} catch(err) {
 					alert(
@@ -656,7 +642,6 @@ lc.startConversion = function ( l ){
 	}
 
 	if ( l === mw.config.get( 'wgContentLanguage' ) ) {
-		mw.log('Nothing to convert. Returned.');
 		return false;
 	}
 
@@ -692,7 +677,6 @@ lc.startConversion = function ( l ){
 		},
 		success: lc.conv_callback
 	});
-	mw.log('Finished conversion');
 };
 /*
 * @requires wgContentLanguage
@@ -724,7 +708,6 @@ lc.isAllowed = function () {
 * Adds the modernization menu when necessary
 */
 lc.load = function () {
-	mw.log('Started "lc.load" function');
 	lc.settings = {
 		msg: {
 			error_missing_dict: 'The following dictionary was not found:\n',
@@ -814,7 +797,6 @@ lc.load = function () {
 	$.extend(true, lc.settings, lc.config);
 
 	if ( !lc.isAllowed() ) {
-		mw.log('Language converter is not allowed on this page. Returning');
 		return;
 	}
 	lc.secure = location.protocol === 'https:';
@@ -830,7 +812,6 @@ lc.load = function () {
 	* {@link lc.startConversion} and {@link mod_lookup}
 	*/
 	lc.lang = lc.get_preferred_variant();
-	mw.log('Prefered variant is "' + lc.lang + '"');
 	$.cookie( lc.cookie, lc.lang, {
 		expires: 7, // expires in 7 days
 		path: '/', // domain-wide, entire wiki
@@ -838,12 +819,10 @@ lc.load = function () {
 	} );
 	lc.render_navigation();
 	lc.startConversion( lc.lang );
-	mw.log('Finished "lc.load" function');
 };
 
-mw.log('The loader function will be called once mw and mw.util are loaded');
 $.when(
-	mw.loader.using( [ 'mediawiki.util', 'jquery.cookie', 'jquery.spinner'] ),
+	mw.loader.using( [ 'mediawiki.util', 'jquery.cookie', 'jquery.spinner', 'mediawiki.RegExp' ] ),
 	$.ready
 ).then( function () {
 	lc.load();
