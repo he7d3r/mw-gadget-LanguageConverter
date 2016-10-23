@@ -2,11 +2,11 @@
 /*global jQuery, mediaWiki, LanguageConverter, self */
 /**
  * Based on [[oldwikisource:MediaWiki:Modernisation.js]]
- * @author [[:fr:User:ThomasV]]
+ * @author: [[:fr:User:ThomasV]]
+ * @author: [[w:fr:User:Phe]]
+ * @author: [[s:fr:User:Tpt]] (https://github.com/Tpt)
  * @author: Helder (https://github.com/he7d3r)
  * @license: CC BY-SA 3.0 <https://creativecommons.org/licenses/by-sa/3.0/>
- * @tracking: [[Special:GlobalUsage/User:He7d3r/Tools/LanguageConverter.js]]
- * [[File:User:He7d3r/Tools/LanguageConverter.js]] (see [[bugzilla:33355]])
  */
 
 /**
