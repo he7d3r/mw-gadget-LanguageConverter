@@ -619,7 +619,7 @@ lc.startConversion = function ( l ){
 					continue;
 				}
 				if ( typeof change[0] === 'string' ) {
-					change[0] = new RegExp( mw.RegExp.escape( change[0] ), 'g' );
+					change[0] = new RegExp( mw.util.escapeRegExp( change[0] ), 'g' );
 				}
 				lc.regTypoChanges.push( change );
 			}
@@ -629,7 +629,7 @@ lc.startConversion = function ( l ){
 					continue;
 				}
 				try {
-					re = new RegExp( mw.RegExp.escape( ch ), 'g' );
+					re = new RegExp( mw.util.escapeRegExp( ch ), 'g' );
 					lc.regTypoChanges.push( [ re, changes[ ch ] ] );
 				} catch(err) {
 					alert(
@@ -822,7 +822,7 @@ lc.load = function () {
 };
 
 $.when(
-	mw.loader.using( [ 'mediawiki.util', 'jquery.cookie', 'jquery.spinner', 'mediawiki.RegExp' ] ),
+	mw.loader.using( [ 'mediawiki.util', 'jquery.cookie', 'jquery.spinner' ] ),
 	$.ready
 ).then( function () {
 	lc.load();
