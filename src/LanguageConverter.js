@@ -550,7 +550,7 @@ lc.conv_callback = function ( res ) {
 		str = mm.innerHTML;
 		lines = str.split('\n');
 		for( i in lines ) {
-			match2 = /^<li>\s*(\S[^:]*?)(?:\s|&#160;|&nbsp;)*:\s*([\S].*?)\s*(?:\/\/.*?)?<\/li>$/i.exec(lines[i]);
+			match2 = /(?:^|<ul>)<li>\s*(\S[^:]*?)(?:\s|&#160;|&nbsp;)*:\s*([\S].*?)\s*(?:\/\/.*?)?<\/li>(?:$|<\/ul>)/i.exec(lines[i]);
 			if( match2 ) {
 				lc.dictionary[ match2[1] ] = match2[2];
 				continue;
