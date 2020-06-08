@@ -3,11 +3,13 @@
 #p-variants-js .flag-pt-br {
 	background: url("//upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/30px-Flag_of_Brazil.svg.png") no-repeat scroll left center transparent;
 	padding-left:40px;
+	background-position: 5px;
 }
 #p-variants-js li#ca-conv-pt-pt a,
 #p-variants-js .flag-pt-pt {
 	background: url("//upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Flag_of_Portugal.svg/30px-Flag_of_Portugal.svg.png") no-repeat scroll left center transparent;
 	padding-left:40px;
+	background-position: 5px;
 }
 .show-changes .v-pt-br,
 .show-changes .v-pt-pt {
