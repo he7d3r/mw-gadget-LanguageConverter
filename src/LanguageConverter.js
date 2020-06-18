@@ -135,20 +135,20 @@ lc.createPortlet = function () {
 	switch( sk ) {
 		case 'vector':
 			// Create a new portlet for this script
-			$newPortlet = $( '#p-cactions' )
-				.clone()
-					.find( 'li' )
-						.remove()
+			$( '#p-variants' ).after(
+				$( '#p-cactions' )
+					.clone()
+						.find( 'ul' )
+							.empty()
+							.end()
+					.attr( {
+						'id': 'p-variants-js'
+					} )
+					.find( 'span' )
+						.text( lc.getLocalMsg( 'menu_title' ) )
+						.addClass( 'flag-' + lc.lang )
 						.end()
-				.attr( {
-					'id': 'p-variants-js',
-					'class': 'vectorMenu emptyPortlet'
-				} )
-				.find( 'span' )
-					.text( lc.getLocalMsg( 'menu_title' ) )
-					.addClass( 'flag-' + lc.lang )
-					.end()
-				.appendTo( '#left-navigation' );
+			);
 			break;
 		default:
 			// Create a new portlet for this script
